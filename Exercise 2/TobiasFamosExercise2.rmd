@@ -1,0 +1,14 @@
+---
+title: "Exercise 2"
+author: "Tobias Famos"
+output: html_document
+---
+## Reading the Data
+```{r}
+education <- read.table("Exercise 1/Education.txt", header=T)
+```
+## Exercise 1: Plotting
+Yes you can change all the Labels on a graph with plot by adding `main`, `ylab` and `xlab` parameters.
+```{r}
+plot(education$Education, education$Wage, xlab="Education in Years", ylab="Wage per Year", main="Education vs Wage", xlim=c(0, max(education$Education)))
+```
