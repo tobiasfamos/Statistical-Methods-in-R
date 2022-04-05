@@ -1,14 +1,65 @@
 ---
 title: "Exercise 2"
 author: "Tobias Famos"
-output: html_document
+output: pdf_document
 ---
 ## Reading the Data
 ```{r}
-education <- read.table("Exercise 1/Education.txt", header=T)
+educationDataSet <- read.table("Education.txt", header=T)
 ```
 ## Exercise 1: Plotting
 Yes you can change all the Labels on a graph with plot by adding `main`, `ylab` and `xlab` parameters.
+
 ```{r}
-plot(education$Education, education$Wage, xlab="Education in Years", ylab="Wage per Year", main="Education vs Wage", xlim=c(0, max(education$Education)))
+plot(educationDataSet$Education, educationDataSet$Wage, xlab="Education in Years", ylab="Wage per Year", main="Education vs Wage", xlim=c(0, max(educationDataSet$Education)))
 ```
+ ## Filtering by Gender
+First create the subsets
+```{r}
+males <- subset(educationDataSet, Gender == 1)
+females <- subset(educationDataSet, Gender == 2)
+```
+Now plot the females and the males
+```{r}
+plot(females$Education, females$Wage, xlab="Education in Years", ylab="Wage per Year", main="Education vs Wage only Female", xlim=c(0, max(educationDataSet$Education)))
+plot(males$Education, males$Wage, xlab="Education in Years", ylab="Wage per Year", main="Education vs Wage only Male", xlim=c(0, max(educationDataSet$Education)))
+```
+Also Plot them both with different colors.
+```{r}
+colors <- educationDataSet$Gender
+plot(educationDataSet$Education, educationDataSet$Wage, xlab="Education in Years", ylab="Wage per Year", main="Education vs Wage", xlim=c(0, max(educationDataSet$Education)), col=colors)
+```
+## Sinmpson's Hostpial
+```{r}
+hospitalDataSet <- read.table("Simpson.txt", header=T)
+hospitalDataSet$Treatment <- factor(hospitalDataSet$Treatment)
+drugs <- subset(hospitalDataSet, as.integer(Treatment)==1)
+surgery <- subset(hospitalDataSet, as.integer(Treatment)==2)
+summary(drugs)
+summary(surgery)
+```
+Just from loking at the mean of the Result, the Drugs seem to be more effective, as the drug mean is 1.239 where the Treatment mean is 1342
+```{r}
+drugsSmall <- subset(drugs, Size == 1)
+surgerySmall <- subset(surgery, Size == 1)
+summary(drugsSmall)
+summary(surgerySmall)
+```
+Yes I change my recommondation as for the small tumors, ther surgery has a mean of 1.105 and the drugs have a mean of the result of 1.18.
+
+
+If the tumor is large:
+```{r}
+drugLarge <- subset(drugs, Size == 2)
+surgeryLarge <- subset(surgery, Size == 2)
+summary(drugLarge)
+summary(surgeryLarge)
+```
+I would recommend the Surgery, as it has a lower mean on the Result. Thus is more effective.
+
+
+## Am I Consistent?
+
+I am not consistent in the cases above.
+The treatments have different effectivenesses for the size of the tumors.
+Thus the treatment decision must be done by taking into account the size of the tumor

@@ -1,0 +1,44 @@
+---
+title: "Exercise 4"
+author: "Tobias Famos"
+output: pdf_document
+---
+# Exercise 4
+## Task 1
+Load the data
+```{r}
+education <- read.table("EducationBis.txt", header=T)
+education$Gender
+education_men <- education[which(education$Gender== "male"), ]
+edcuation_women <- education[which(education$Gender=="female"),]
+```
+
+Now build linear model to explain `Wage` by `Edcuation`
+```{r}
+linear_model_men <- lm(education_men$Wage~education_men$Education)
+linear_model_women <- lm(edcuation_women$Wage~edcuation_women$Education)
+summary(linear_model_men)
+summary(linear_model_women)
+```
+For both models, the multiple R^2 is quite high, thus we can conclude that the linear model explains much of the variance.
+The model for the women shows a significant p value in both the intercept and the slope, thus we can accpet it as true.
+The model for the men has only a significant p value in the slope but not in the intercept.
+
+
+## Task 2
+The slopes are significantly different from 0 as they both have a p value < 0.5%.
+
+## Task 3
+First remove the ID column as we don't need it
+```{r}
+education_no_index <- subset(education, select=-c(ID))
+
+```
+```{r}
+unifiedModel <- lm(education_no_index$Wage~., data=education_no_index)
+summary(unifiedModel)
+```
+
+The unified model explains the Wage quite good. All variables are significant, and the R^2 is almost 1.
+
+## Task 4

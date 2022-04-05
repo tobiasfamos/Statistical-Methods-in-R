@@ -1,0 +1,73 @@
+---
+title: "Exercise 3"
+author: "Tobias Famos"
+output: pdf_document
+---
+## Reading the Data
+```{r}
+original_data <- read.table("Mean20.txt", header=T)
+```
+Computing the Median, Mean, Standard Deviation, min and maximum of the variable time.
+```{r}
+summary(original_data)
+```
+As we can see with the summary command, we need to do some preprocessing of the dataset, as there is a negative time and one NA.
+```{r}
+meanDataSet <- na.omit(original_data)
+meanDataSet <- meanDataSet[which(meanDataSet$time >=0),]
+summary(meanDataSet)
+plot(meanDataSet)
+```
+Calculate the Min, Max, mean, standard deviation and median
+one NA.
+```{r}
+media <- median(meanDataSet)
+mean <- mean(meanDataSet)
+min <- min(meanDataSet)
+max <- max(meanDataSet)
+std <- sd(meanDataSet)
+```
+## Exercise 2
+```{r}
+t.test(meanDataSet, mu=7.05)
+t.test(original_data, mu=7.05)
+```
+We can find no significant indication that the mean is 7.05. Thus the alternative hypothesis must be concidered true, that the mean is not equal to 7.05
+
+The difference to the original Data set is that the confidence interval is larger.
+
+## Question 3
+With this knowledge we can do a one sided test.
+```{r}
+t.test(meanDataSet, mu=7.05, alternative = "greater")
+```
+Same thing, it is still not significant.
+
+# Qeustion 4
+```{r}
+secondMax <- function (vector){
+  if(!is.vector(vector)){
+    stop("Argument must be a vector")
+  }
+  n <- length(vector)
+  return( sort(vector,partial=n-1)[n-1])
+}
+secondMax(meanDataSet)
+secondMax(c(1,2,3,4))
+
+```
+## Question 5
+
+I think the Goal is to return the Summary so I will do this.
+```{r}
+mySummary <- function(x){
+  media <- median(meanDataSet)
+  mean <- mean(meanDataSet)
+  min <- min(meanDataSet)
+  max <- max(meanDataSet)
+  std <- sd(meanDataSet)
+  return(c(mean, media, std, min, max))
+}
+
+mySummary(medianDataSet)
+```
