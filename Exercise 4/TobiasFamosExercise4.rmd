@@ -3,12 +3,10 @@ title: "Exercise 4"
 author: "Tobias Famos"
 output: pdf_document
 ---
-# Exercise 4
 ## Task 1
 Load the data
 ```{r}
 education <- read.table("EducationBis.txt", header=T)
-education$Gender
 education_men <- education[which(education$Gender== "male"), ]
 edcuation_women <- education[which(education$Gender=="female"),]
 ```
@@ -42,3 +40,36 @@ summary(unifiedModel)
 The unified model explains the Wage quite good. All variables are significant, and the R^2 is almost 1.
 
 ## Task 4
+We can't use vendor name and model name to explain the performance.
+
+## Task 5
+```{r}
+computers <- read.table("Computers.txt", header=T)
+computers_no_vendor_model <- subset(computers, select=-c(vendor, model))
+
+computeds_model <- lm(computers_no_vendor_model$PRP~. , data=computers_no_vendor_model)
+summary(computeds_model)
+```
+From the preliminary linear regression, the single variable I would use for a linear regression is the `ERP`.
+
+```{r}
+singleModel <- lm(computers$PRP ~ computers$ERP)
+summary(singleModel)
+confint(singleModel)
+```
+The model explains the 93% of the variance, and it is quite significant.
+The confidence interval is 2 times the standard error, thus 2*0.018 = 0.036
+## Task 6
+```{r}
+plot(computers$PRP, computers$ERP, xlab="Published Relative Performance", ylab="Performance", main="Performance vs published realtive Performance " )
+abline(singleModel$coefficients)
+```
+
+# Task 7
+```{r}
+cars = read.table("Cars.txt", header=T)
+cars = subset(cars, select = -c(name))
+all_model <- lm(cars$mpg~.,data=cars)
+summary(all_model)
+```
+The not significant variables are : `cylinders`, `horsepower` and `acceleration`
