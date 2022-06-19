@@ -1,0 +1,85 @@
+%! Author = tobias
+%! Date = 18.06.22
+
+% Preamble
+\documentclass[11pt]{article}
+
+% Packages
+\usepackage{amsmath}
+\usepackage{amsfonts}
+\usepackage{graphicx}
+\title{Statistical Learning Methods \\ Questions Lecture 4}
+\author{Tobias Famos}
+% Document
+\begin{document}
+    \maketitle
+    \subsection*{Questions}
+    \begin{enumerate}
+        \item What are the advantages of K-NN Regression?
+        \item What are the disadvantages of K-NN Regression?
+        \item How to select distance measure for K-NN Regression?
+        \item How are similarity and distance connected?
+        \item Show a few distance measures for numerical values
+        \item Show a few distance measures for sets
+        \item Why do we normalize?
+        \item Show a few ways to normalize
+        \item What hyperparameters are there for KNN?
+        \item Explain how KNN regression works
+    \end{enumerate}
+    \newpage
+    \subsection*{Answers}
+    \begin{enumerate}
+        \item \begin{itemize}
+                  \item It is non-parametric, meaning there are no parameters to be determined, only the data it is performed
+                  upon.
+                  \item No strong assumptions about $f(x)$ thus it can generate complex boundaries
+        \end{itemize}
+        \item \begin{itemize}
+                  \item As non parametric model, it needs a lot of data
+                  \item It is slow compared to other models
+                  \item No simple statistical tests (e.g. p-values for coefficients)
+                  \item No internal feature weighting.
+                  All features are taken into consideration, thus a feature selection must be performed.
+        \end{itemize}
+        \item \begin{itemize}
+                  \item There is no clear way, no best distance measure (no free lunch)
+                  \item Can only be determined by trial and error.
+        \end{itemize}
+        \item \begin{itemize}
+                  \item $\text{similarity} = 1 - \text{distance}$
+        \end{itemize}
+        \item \begin{itemize}
+                  \item Manhattan Distance $= \sum_{i=0}^{n} |a_i - b_i| $
+                  \item Euclidean Distance $= \sqrt[2]{\sum_{i=0}^{n} (a_i - b_i)^2 }$
+                  Is most videly used.
+                  \item Canbera $= \sum_{i=0}^{n} \frac{|A_i - B_i|}{|A_i| + |B_i|}$
+                  \item Tantimoto $= \sum_{i=0}^{n} \frac{|A_i - B_i|}{max(A_i, B_i)}$
+        \end{itemize}
+        \item \begin{itemize}
+                  \item Jaccard $= \frac{|A \cap B |}{|A \cup B|}$
+                  \item Dice $= \frac{2 \cdot |A \cap B |}{|A| + |B|}$
+        \end{itemize}
+        \item \begin{itemize}
+                  \item When working with distances (such as in K-NN) the normalization is important.
+                  \item We normalize to make sure all the attributes have the same weight in the distance.
+        \end{itemize}
+        \item \begin{itemize}
+                  \item MinMax Norm: $w'_k = \frac{w_k - min}{ max - min}$
+                  \item Z-Score: $w'_k = \frac{w_k - \mu}{\sigma}$ ($\mu$: Mean, $\sigma$: Standard Deviation)
+        \end{itemize}
+        \item \begin{itemize}
+                  \item Distance Metric
+                  \item K (number of nearest neighbours to consider)
+        \end{itemize}
+        \item \begin{itemize}
+                  \item To predict the value for $x$ we take the average of the $K$ nearest neighbours of x($N_i$).
+                  \item $f(x) = \frac{1}{k} \cdot \sum_{x_i \in N_i}^{} y_i $
+                  \item Intuitively: We take all the k neighbours, take their values and take average for $x$
+        \end{itemize}
+        \item
+
+    \end{enumerate}
+    \begin{itemize}
+        \item
+    \end{itemize}
+\end{document}

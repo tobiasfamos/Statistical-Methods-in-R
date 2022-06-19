@@ -1,0 +1,78 @@
+%! Author = tobias
+%! Date = 18.06.22
+
+% Preamble
+\documentclass[11pt]{article}
+
+% Packages
+\usepackage{amsmath}
+\usepackage{amsfonts}
+\title{Statistical Learning Methods \\ Questions Lecture 1}
+\author{Tobias Famos}
+% Document
+\begin{document}
+    \maketitle
+\subsection*{Questions}
+\begin{enumerate}
+    \item What is statistical learning?
+    \item What is the difference between Data and Information?
+    \item Can you just use any data?
+    \item Why do we estimate $f()$?
+    \item How do we estimate $f()$?
+    \item What is the trade-off between prediction accuracy and model interpretability?
+    \item What is the difference between supervised and unsupervised learning?
+    \item What is the difference between regression and classification problems?
+    \item What is the difference between $\mu$ and $\hat{\mu}$
+    \item What is the no free lunch theorem?
+\end{enumerate}
+    \newpage
+\subsection*{Answers}
+\begin{enumerate}
+    \item \begin{itemize}
+              \item We have data and we suppose there is a relationship between $X$ and $Y$.
+              \item We try to to model the relationship with a funciton $Y = f(X) + \epsilon$.
+              \item We model the relationship to either predict or explain the relationship.
+    \end{itemize}
+    \item Data is the encoding of information.
+    Information is the meaning you can get out of data.
+    \item No you can't.
+    Data should be preprocessed.
+    \begin{itemize}
+        \item Remove outliers
+        \item Remove illegal values / obvious measurement errors(e.g. negative age)
+        \item Remove any rows with missing values
+    \end{itemize}
+    \item \begin{itemize}
+              \item Either to \textbf{ predict} (We wan't to compute $y$ for new $x$)
+              \item Or to \textbf{explain} (We want to have an explanation on how the price is influenced by different
+              factors)
+    \end{itemize}
+    \item \begin{itemize}
+              \item We have a training set of data.
+              \item We build a model with the training set and assess it for its efficiency.
+    \end{itemize}
+    \item \begin{itemize}
+              \item More accurate models are more complex.
+              \item More complex models are more difficult to interpret.
+              \item Interpretability can be an important factor for model choice
+              \item Example: Treatment in medical setting, there it must be clear why a decision has been made.
+    \end{itemize}
+    \item \begin{itemize}
+              \item In supervised learning, we can observe $X$ and $Y$ of the training data. (e.g. linear regression)
+              \item In unsupervised learning we can only observe $X$ of the training data. (e.g. clustering)
+              \item Thus in supervised learning, we know the classification / prediction of the elements in training data
+              whereas in unsupervised learning we don't.
+    \end{itemize}
+    \begin{itemize}
+        \item
+    \end{itemize}
+    \item In regressions, $Y$ is $\mathbb{R}$ where in classification $Y$ is an element of a finite set of classes.
+    \item \begin{itemize}
+              \item Greek letters without the hat ($\mu$): A fixed number based on the whole population.
+              \item Greek letters with the hat ($\hat{\mu}$): A estimated number based on a sample.
+              \item The estimated values are used to infer the real values.
+    \end{itemize}
+    \item The no free lunch theorem states that no machine learning algorithm is universally better than any other.
+    But for a specific class of problems, some algorithms can outperform others.
+\end{enumerate}
+\end{document}

@@ -1,0 +1,46 @@
+%! Author = tobias
+%! Date = 18.06.22
+
+% Preamble
+\documentclass[11pt]{article}
+\usepackage{listings}
+
+
+% Packages
+\usepackage{amsmath}
+\usepackage{amsfonts}
+\usepackage{graphicx}
+\title{Statistical Learning Methods \\ Questions About R}
+\author{Tobias Famos}
+% Document
+\begin{document}
+    \maketitle
+    \subsection*{Questions}
+    \begin{enumerate}
+        \item Write a function to normalize a vector \texttt{x}
+        \item Write a function that returns the second largest value of a list.
+        \item Write a block of code that splits a dataset randomly into two halfs
+    \end{enumerate}
+    \newpage
+    \subsection*{Answers}
+    \begin{enumerate}
+        \item \begin{lstlisting}[language=R]
+minMax <- function(x){
+    return ((x-min(x) / max(x) - min(x))
+}
+        \end{lstlisting}
+        \item
+        \item \begin{lstlisting}[language=R]
+n <- dim(dataset)[1]
+mySample <- 1:n
+test <- sample(mySample, n/2)
+train <- mySample[-test]
+dataset.test <- dataset[test]
+dataset.train <- dataset[train]
+
+        \end{lstlisting}
+    \end{enumerate}
+\end{document}
+
+\item \begin{lstlisting}[language=R]
+\end{lstlisting}
