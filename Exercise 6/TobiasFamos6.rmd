@@ -1,0 +1,59 @@
+---
+title: "Exercise 5"
+author: "Tobias Famos"
+output: pdf_document
+---
+# Exercise 6
+## Task 1
+Here is the linear model for the computers
+```{r}
+computers <- read.table("/home/tobias/unibe/statistical methods in R/Exercise 6/Computers.txt", header = T, as.is = FALSE)
+computers_subset <- subset(computers, select = -c(model, ERP, vendor))
+computers_subset <- subset(computers_subset, select = -c( CGMIN, MYCT))
+model.linear <- lm(computers_subset$PRP~., data=computers_subset)
+
+
+```
+
+Here is the KNN model for the computers.
+```{r}
+library(FNN)
+set.seed(12345)
+size <- nrow(computers)
+sample_indexes <- 1: size
+sample_indexes.test <- sample(sample_indexes, 100)
+sample_indexes.train <- sample_indexes[-sample_indexes.test]
+lables.test <- computers[sample_indexes.test,9]
+lables.train <- computers[sample_indexes.train,9]
+computers_no_label <- subset(computers, select=-c(PRP))
+```
+Normalize using z score
+
+```{r}
+computers_no_label <- subset(computers_no_label, select = -c(model, ERP, vendor))
+computers.norm <- sapply(computers_no_label, function(computers_no_label) (computers_no_label-mean(computers_no_label))/sd(computers_no_label))
+
+```
+Divide into test and train dataset
+```{r}
+computers.test <- computers.norm[sample_indexes.test,]
+computers.train <- computers.norm[sample_indexes.train,]
+```
+
+Calculate KNN model
+```{r}
+model.knn <- knn.reg(computers.train, computers.test, lables.train, k=10)
+```
+Plot the different predicted and observed values
+```{r}
+plot(model.knn$pred, lables.test, pch=20)
+abline(0,1, col="red")
+```
+```{r}
+MSE_knn <- 1:20
+for (k in 1:20){
+  model_knn <- knn.reg(computers.train, computers.test, lables.train, k=k)
+  MSE_knn[k] <- mean((model_knn$pred - lables.test)^2)
+}
+plot(MSE_knn)
+```

@@ -1,0 +1,54 @@
+---
+title: "Exercise 5"
+author: "Tobias Famos"
+output: pdf_document
+---
+# Exercise 5
+## Task 1
+```{r}
+educationBis <- read.table("/home/tobias/unibe/statistical methods in R/Exercise 5/EducationBis.txt", header = T, as.is = FALSE)
+educationBis <- subset(educationBis, select=-c(ID))
+plot(educationBis$Gender, educationBis$Wage, xlab="Gender", ylab = "Wage", main="Wage by Gender")
+plot(educationBis$Education, educationBis$Wage, xlab="Education", ylab = "Wage", main="Wage by Education")
+summary(educationBis)
+
+```
+```{r}
+linear_model <- lm(educationBis$Wage ~ . , data=educationBis)
+summary(linear_model)
+```
+From the output we can conclude that the model accurately describes the Wage using the variables Education and Gender.
+As the R^2 is 0.99 (almost 1) we can conclude that with our dataset we explain the bulk part of the variance.
+Additionally, we can conclude that for our dataset both gender and education have a very high significance due to the low P value.
+
+## Task 2
+Read Data, remove model and ERP (model is not usable as it is unique, thus can be seen as an ID)
+```{r}
+computers <- read.table("/home/tobias/unibe/statistical methods in R/Exercise 5/Computers.txt", header = T, as.is = FALSE)
+computers <- subset(computers, select = -c(model, ERP))
+computers_only_numeric <- subset(computers, select = -c(vendor))
+
+```
+
+Take a look at the correlation of the numeric values to perform feature selection
+
+```{r}
+cor(computers_only_numeric$PRP, computers_only_numeric)
+```
+Remove the features that have not sufficient correlation
+```{r}
+computers <- subset(computers, select = -c( CGMIN, MYCT))
+```
+```{r}
+model2 <- lm(computers$PRP~., data=computers)
+summary(model2)
+```
+
+By using the remaining features we can build a good model that explains 90% of the variance.
+
+## Task 3
+The most important feature is MMIN
+```{r}
+plot(computers$MMIN, computers$PRP , xlab = "Computers MMIN", ylab="Computers PRP", main="Computers PRP ~ MMIN" )
+```
+There are a few outliers. Additionally, it looks like the data is more on the lower end of MMIN and quite sparse on the higher end.

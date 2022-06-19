@@ -1,0 +1,89 @@
+---
+title: "Statistical Learning Methods Exercise 11"
+output: pdf_document
+author: "Tobias Famos"
+---
+# Preliminaries
+
+Loading the Votes
+```{r}
+votes <- read.table("/home/tobias/unibe/statistical methods in R/Exercise 11/Votes.txt", header=T)
+sum(is.na(votes))
+```
+
+Add the row names to prevent objects to only show up as numbers in plots
+```{r}
+rownames(votes) <- votes$Vote
+
+```
+# Task 1 Cluster the votes from 2000 until 20145
+Select the votes for the clustering
+```{r}
+votes_00_to_14 <- votes[28:161]
+dist_00_to_14 <- dist(votes_00_to_14)
+cluster_00_to_14 <- hclust(dist_00_to_14, method="complete")
+plot(cluster_00_to_14)
+```
+
+# Task 2 Cluster votes from 2014 to 2017
+
+```{r}
+votes_14_to_17 <- votes[0:27]
+dist_14_to_17 <- dist(votes_14_to_17)
+labels <- votes$Vote
+cluster_14_to_17 <- hclust(dist_14_to_17, method="complete")
+plot(cluster_14_to_17)
+```
+
+# Task 3 Compare
+```{r}
+library(dendextend)
+dend00 <- as.dendrogram (cluster_00_to_14)
+dend14 <- as.dendrogram (cluster_14_to_17)
+
+dend_list <- dendlist(dend00, dend14)
+
+dendlist(dend00, dend14) %>%
+  untangle(method = "step1side") %>% # Find the best alignment layout
+  tanglegram()
+
+```
+In both clustering approaches there are two pretty distinct clusters emerging.
+When comparing the two pretty distinct clusters, the only different canton in them is the TI.
+
+# Task 4 Average Link method
+For 2000 to 2014
+```{r}
+cluster_00_to_14_average <- hclust(dist_00_to_14, method="average")
+plot(cluster_00_to_14_average)
+```
+```{r}
+dend <- as.dendrogram (cluster_00_to_14)
+dendAverage <- as.dendrogram (cluster_00_to_14_average)
+
+dend_list <- dendlist(dend, dendAverage)
+
+dendlist(dend, dendAverage) %>%
+  untangle(method = "step1side") %>% # Find the best alignment layout
+  tanglegram()
+```
+
+When clustering the same data with the average method, we get again two pretty distinct clusters, but the members of
+the clusters have changed quite a lot
+
+
+```{r}
+cluster_14_to_17_average <- hclust(dist_14_to_17, method="average")
+plot(cluster_14_to_17_average)
+```
+```{r}
+dend <- as.dendrogram (cluster_14_to_17)
+dendAverage <- as.dendrogram (cluster_14_to_17_average)
+
+dend_list <- dendlist(dend, dendAverage)
+
+dendlist(dend, dendAverage) %>%
+  untangle(method = "step1side") %>% # Find the best alignment layout
+  tanglegram()
+```
+The same thing holds for the 2014 to 2017 Data

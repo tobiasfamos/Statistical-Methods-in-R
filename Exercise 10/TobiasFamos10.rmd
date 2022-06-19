@@ -1,0 +1,95 @@
+---
+title: "Exercise 10"
+author: "Tobias Famos"
+output: pdf_document
+---
+
+# Loading the data
+
+Load the data
+```{r}
+boston <- read.table("/home/tobias/unibe/statistical methods in R/Exercise 10/Boston.txt", header=T)
+str(boston)
+```
+Drop the `medv`row
+
+```{r}
+boston.medv <- boston$medv
+boston.clean <- subset(boston, select=-medv)
+str(boston.clean)
+```
+# Task 1: Normalize and build PCA.
+Normalize the Data with the z-score using the built in scale function.
+Note that scale returns a matrix not a data frame. For simplicity, I have converted it back to a data frame
+```{r}
+boston.nrom <- as.data.frame(scale(boston.clean))
+cor(boston.nrom)
+```
+Now building the PCA with the built in function `princomp`
+```{r}
+boston.pca <- princomp(boston.nrom, cor=T)
+summary(boston.pca, loadings=T)
+```
+
+Plot the PCA to have a visual representation
+```{r}
+plot(boston.pca)
+```
+# Task 2
+From the summary of the loadings of the PCA we can deduce the following on the influence of the predictors on the
+component 1:
+The `indus` (proportion of non-retail business acres per town.) has the highest influence on the component 1.
+The `chas` (view on the river) is not considered in the component 1.
+And the lowest influence on the component 1 (when not counting not considered predictors) is `rm`(average number of rooms
+per dwelling)
+```{r}
+summary(boston.pca, loadings=T)
+```
+
+
+# Task 3
+The portion of variance is not given explicitly by the `princomp` command but can be calculated using the standard
+deviations (portion of variance is the normalized standard deviation)
+```{r}
+portion_of_variance <- boston.pca$sdev^2/sum(boston.pca$sdev^2)
+portion_of_variance
+```
+```{r}
+sum(portion_of_variance[0:4])
+sum(portion_of_variance[0:5])
+```
+The break of explaining 80% of the variance is reached by adding the component 5.
+
+# Task 4: Create new dataset and predict
+All the values for the components are already provided by `princomp`. Thus we only have to select the stated components
+(1 - 5) from Task 3 and we have build the dataset.
+```{r}
+boston.data.pca <- as.data.frame(boston.pca$scores[,1:5])
+boston.data.pca$medv <- boston.medv
+```
+Now build a multiple linear regression
+```{r}
+library(boot)
+boston.mlr <- glm(medv~., data=boston.data.pca)
+summary(boston.mlr)
+boston.cv <- cv.glm(boston.data.pca, boston.mlr, K=10)
+```
+
+# Task 5 Build an compare model with all components
+First build the model using all the components.
+```{r}
+boston.data.pca_all <- as.data.frame(boston.pca$scores)
+boston.data.pca_all$medv <- boston.medv
+boston.mlr_all <- glm(medv~., data=boston.data.pca_all)
+summary(boston.mlr_all)
+boston.cv.all <- cv.glm(boston.data.pca_all, boston.mlr_all, K=10)
+```
+Now lets compare the cross validated mean square errors
+```{r}
+boston.cv$delta[1]
+boston.cv.all$delta[1]
+```
+
+As we acn see, the cross validated mean squared error is smaller for the set using all the components.
+Although this is not on truly fresh data, thus the danger of overfitting is still present.
+To eliminate this danger one might do a train / validation split for evaluating the models

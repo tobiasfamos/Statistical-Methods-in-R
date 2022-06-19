@@ -1,0 +1,110 @@
+---
+title: "Exercise 7"
+author: "Tobias Famos"
+output: pdf_document
+---
+## Preliminaries Task 1
+Load library boot and load the Cars data
+```{r}
+library(boot)
+cars <- read.table("/home/tobias/unibe/statistical methods in R/Exercise 7/Cars.txt", header = T)
+cars <- subset(cars, select = -c(name))
+cars <- na.omit(cars)
+summary(cars)
+```
+
+# Task 1
+Build the multiple linear regression model from exercise 5 and 6
+```{r}
+model.mulitple_linear <- glm(mpg~., data=cars)
+summary(model.mulitple_linear)
+```
+We see that cylinders, horsepower, and acceleration are not significant. Thus we drop them and run a linear model again
+```{r}
+cars_clean <- subset(cars, select=-c(cylinders, horsepower,acceleration ))
+model.mulitple_linear_clean <- glm(mpg~., data=cars_clean)
+summary(model.mulitple_linear_clean)
+```
+From the output we can derive again that the displacement is not significant in this model, thus we drop it as well,
+```{r}
+cars_clean2 <- subset(cars_clean, select=-c(displacement))
+model.mulitple_linear_clean2 <- glm(mpg~., data=cars_clean2)
+summary(model.mulitple_linear_clean2)
+```
+Now we have arrived at multiple linear regression model with only significant Coefficients.
+As we have three linear models now that should get better with each tweaking we did, lets compare them with 10 fold
+cross validation.
+
+```{r}
+set.seed(123)
+cv.initial <- cv.glm(cars, model.mulitple_linear, K=10)
+cv.clean <- cv.glm(cars_clean, model.mulitple_linear_clean, K=10)
+cv.clean_2 <- cv.glm(cars_clean2, model.mulitple_linear_clean2, K=10)
+
+# Print the MSE for each
+cv.initial$delta[1]
+cv.clean$delta[1]
+cv.clean_2$delta[1]
+```
+The mean squared error does not change, which makes sense in a linear model, as the omitted predictors are just set to
+0 if they are left in.
+
+
+```{r}
+t.test(formual=model.mulitple_linear$formula, cars)
+t.test(formual=model.mulitple_linear_clean$formula, cars)
+t.test(formual=model.mulitple_linear_clean2$formula, cars)
+```
+Somehow my t test tells we can accept the alternative hypothesis for all the hypothesis and we have the same confidence
+interval. I think I have made a mistake here.
+
+# Preliminaries Task 2
+Load the cancer data set. Import it as is so the Diagnostic gets converted to a factor.
+```{r}
+cancer <- read.table("/home/tobias/unibe/statistical methods in R/Exercise 7/Cancer.txt", header = T, as.is = F)
+str(cancer)
+```
+Check for NA
+```{r}
+sum(is.na(cancer))
+```
+
+Drop the ID as we don't need it for predcitions
+
+```{r}
+cancer <- subset(cancer, select = -c(ID))
+```
+
+# Task 2: Apply a general logistic regression to estimate the `Diagnostic`
+Using the `glm`with `family=binomial` we can build a model using all the predictors.
+```{r}
+model.logistic <- glm(cancer$Diagnostic ~ ., data = cancer, family = binomial)
+summary(model.logistic)
+```
+
+## Most important values of the model
+Lets start with the **Coefficients**:
+Most of the Coefficients have a high `z-value` and thus a small probability of being bigger than `|z|`.
+There are a few exceptions:
+
+- **Concavity** has a low `z-value` of `0.74` and thus is not significant. To simplify the model it can be omitted (although it is practically already omitted by setting a coefficient approximately equal 0)
+- **Compact** and **Concave** have both a probability `>1%` and `<5%`. As we do not have a hughe dataset, we could also omit them if we want to be strict
+
+The **AIC** score is quite high. This could be a warning sign, but as we only have one model there is nothing to compare it with.
+
+Also the **Deviance Residual** is quite high.
+
+## Estimating error Rate
+We use the resubstitution approach to get an optimistic view on the correctly and falsely classified instances
+```{r}
+labels <- cancer$Diagnostic
+without_label <- subset(cancer, select = -c(Diagnostic))
+prediction <- predict(model.logistic, data = without_label, type = "response")
+factor_prediction <- cut(prediction, labels = c("M", "B"), breaks = 2)
+table(factor_prediction == labels)
+```
+Calculate the Error rate
+```{r}
+444 / length(labels)
+```
+We arrive at an accuracy of **78.03163**. This isn't too much but also not too bad. With a few tweaks we may be able to get it higher

@@ -1,0 +1,11 @@
+---
+title: "Statistical Learning Methods Exercise 9"
+author: "Tobias Famos"
+output: pdf
+---
+# Preliminaries Task 1 - 3
+Load and inspect the dataset
+```{r}
+low_weight <- read.table("./LowWeight.txt", header=T)
+
+```

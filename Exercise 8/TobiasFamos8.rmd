@@ -1,0 +1,114 @@
+---
+title: "Exercise 8"
+author: "Tobias Famos"
+output: pdf_document
+---
+## Preliminaries
+Read the data
+```{r}
+vertebral <- read.csv("/home/tobias/unibe/statistical methods in R/Exercise 8/Vertebral.txt", as.is=F)
+summary(vertebral)
+library(boot)
+```
+Check for NA / missing values
+```{r}
+sum(is.na(vertebral))
+```
+Take a look at the data
+```{r}
+only_predictors <- subset(vertebral, select=-Status)
+pairs(only_predictors, bg=c("red", "blue"), pch=21)
+```
+
+Import the library for LDA and cross validation
+```{r}
+library(MASS)
+library(boot)
+```
+## Logistic Regression
+Build an initial logistic regression modell
+```{r}
+vertebral.logistic <- glm(Status~., data=vertebral, family=binomial)
+summary(vertebral.logistic)
+```
+
+Build again without the not significant predictors Incidence, Tilt, Angle and Slope
+```{r}
+vertebral.logistic <- glm(Status~Radius + Degree, data=vertebral, family=binomial)
+summary(vertebral.logistic)
+
+```
+```{r}
+vertebral.logistic.cv <- cv.glm( vertebral,vertebral.logistic, K=10)
+vertebral.logistic.cv $delta[1]
+```
+Thus we derive at an Error rage of 1 - 0.12344 = **0.87656**
+## LDA
+Build the Linear Discriminant Analysis
+
+```{r}
+cor(only_predictors)
+```
+```{r}
+
+vertebral.lda <- lda(Status ~ Slope + Tilt+ Angle+Radius+Degree, data=vertebral, CV = TRUE)
+table <- table(vertebral$Status, vertebral.lda$class, dnn = c('Actual Group','Predicted Group'))
+table
+1 - (table[1,1] + table[2,2])/length(vertebral$Status)
+```
+As we can see, the accuracy lies at (191+73)/310 = **0.8516**. As this accuracy is derived at via cross validation we can
+take it as more reliable as if we would have just derived it from a reevaluation with the train data.
+
+## Task 3 Assessing
+To assess a model fairly we must test it with new data (test data).
+Thus we need first to split the data in a train and test data set.
+This might reduce the accuracy of the models we build (depending on the model more or less) but it helps us to evaluate
+the models better and should not be ignored.
+
+The methodology can be seen as fair, as both models get the same train and test data and thus have equality of
+oppurtunity. But, one could also argue that a smaller train set is an advantage for the LDA, as it generally performs
+better with small sets than the logistic regression.only
+```{r}
+set.seed(2022)
+sample <- sample(c(TRUE, FALSE), nrow(vertebral), replace=TRUE, prob=c(0.7,0.3))
+train  <- vertebral[sample, ]
+test   <- vertebral[!sample, ]
+```
+Build the LDA model (note that we need to set cross validation to false, as this is needed for making predictions with
+the model on new data.
+```{r}
+train.lda <- lda(Status ~ Slope + Tilt+ Angle+Radius+Degree, data=vertebral, CV = FALSE)
+predictions <- predict(train.lda, test)
+prediction_table <- table(test$Status, predictions$class, dnn = c('Actual Group','Predicted Group'))
+error_rate.lda <- 1-(prediction_table[1,1] + prediction_table[2,2])/length(test$Status)
+error_rate.lda
+```
+Build the logistic regression model with the train data and test it with the new test data.
+```{r}
+train.log_reg <-  glm(Status~Radius + Degree, data=vertebral, family=binomial)
+predictions <- predict(train.log_reg, test, type="response")
+
+```
+Turn the probabilities into Abnormal and Normal and calculate the error Rate
+```{r}
+predictions[which(predictions<0.5)]<- "Abnormal"
+predictions[which(predictions!="Abnormal")]<- "Normal"
+prediction_table.log_reg <- table(test$Status, predictions, dnn = c('Actual Group','Predicted Group'))
+prediction_table.log_reg
+error_rate.log_reg <- 1-(prediction_table.log_reg[1,1] + prediction_table.log_reg[2,2])/length(test$Status)
+error_rate.log_reg
+```
+
+We arrive at the following error Rates
+
+| Model | Error Rate Train / Test split | Error Rate Resubstitution |
+|-------|:-----------:|-------------------------|
+| LDA |  0.1313131  | 0.1483871               |
+|Logistic Regression | 0.1616162  | 0.1220684               |
+
+Thus we can conclude that based on a 30 / 70 test train split the Logistic Regression has a slightly higher error rate
+than the Linear Discriminative Analysis.
+In the resubstitution method with cross validation the Logistic Regression has a slightly lower error rate as the LDA.
+
+As the resubstitution method does not punish overfitting and even encourages it, i would still tend to state that the
+LDA model is the better predictor model for this dataset.

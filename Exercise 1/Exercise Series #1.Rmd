@@ -1,0 +1,174 @@
+---
+title: 'Solutions Exercise #1'
+author: "Pasquale De Rosa"
+date: "08/03/2022"
+output:
+  pdf_document: default
+  html_document: default
+subtitle: Data Manipulation with R
+---
+
+## Preliminaries
+
+Load the "Education.txt" dataset from the ILIAS website.
+```{r}
+education <- read.table("Exercise 1/Education.txt", header=T)
+```
+Let's have a look to the dataset characteristics with the function summary().
+(Hint: always do it, the output answers several of the exercise problems).
+```{r}
+summary(education)
+```
+## Problem 1: For each variable, compute the mean, the median, the standard deviation, the minimum and maximum value.
+
+Education:
+```{r}
+min(education$Education)
+max(education$Education)
+mean(education$Education)
+sd(education$Education)
+```
+Wage:
+```{r}
+min(education$Wage)
+max(education$Wage)
+mean(education$Wage)
+sd(education$Wage)
+```
+Computing those descriptives for the Gender (binary variable) makes no sense.
+
+## Problem 2: As the variable Gender is a categorical (binary data), select the Wage and Education values corresponding to each of the two possible Gender values. Compute the mean, the median, the standard deviation, the minimum and maximum value for each Gender separately. What can you infer from these values?
+
+Let's split the dataset per Gender:
+```{r}
+men <- education[which(education$Gender == "1"), ]
+women <- education[which(education$Gender == "2"), ]
+```
+Let's have a look to the datasets characteristics with the function summary().
+```{r}
+summary(men)
+summary(women)
+```
+Now we can compute separate statistics for each Gender.
+
+Education (men):
+```{r}
+min(men$Education)
+max(men$Education)
+mean(men$Education)
+sd(men$Education)
+```
+Education (women):
+```{r}
+min(women$Education)
+max(women$Education)
+mean(women$Education)
+sd(women$Education)
+```
+Wage (men):
+```{r}
+min(men$Wage)
+max(men$Wage)
+mean(men$Wage)
+sd(men$Wage)
+```
+Wage (women):
+```{r}
+min(women$Wage)
+max(women$Wage)
+mean(women$Wage)
+sd(women$Wage)
+```
+The values for the two Gender look aligned, but the presence of outliers makes 
+the data not easy to interpret as it is.
+
+## Problem 3: Can you detect some inconsistencies in the data? If yes, what would you do to handle them?
+
+The previous steps showed that there are outlier values interfering with our
+analysis. More specifically, we observe:
+
+- A negative Education value (-12) in row 234;
+
+- A non binary value for the Gender (20) in row 107;
+
+- A very small Wage (41.8) in row 435.
+
+To handle this issue, we can simply delete the outlier rows.
+```{r}
+cleaned <- education[-c(234, 107, 435), -1]
+summary(cleaned)
+```
+Let's repeat the Gender analysis, this time using the cleaned dataset.
+We recompute the Gender-split data:
+```{r}
+men_new <- cleaned[which(cleaned$Gender == "1"), ]
+women_new <- cleaned[which(cleaned$Gender == "2"), ]
+```
+And after recompute Education and Wage for men and women.
+
+Education (men):
+```{r}
+min(men_new$Education)
+max(men_new$Education)
+mean(men_new$Education)
+sd(men_new$Education)
+```
+Education (women):
+```{r}
+min(women_new$Education)
+max(women_new$Education)
+mean(women_new$Education)
+sd(women_new$Education)
+```
+Wage (men):
+```{r}
+min(men_new$Wage)
+max(men_new$Wage)
+mean(men_new$Wage)
+sd(men_new$Wage)
+```
+Wage (women):
+```{r}
+min(women_new$Wage)
+max(women_new$Wage)
+mean(women_new$Wage)
+sd(women_new$Wage)
+```
+We can observe that despite having almost the same years of studies, women 
+perceive a lesser average salary than men (-629.991).
+
+## Problem 4: What can you infer from all the other variables when the main focus is to predict the values for Wage?
+
+Observing the cleaned data, is possible to identify some relations between the 
+Wage and the other variables.
+The Wage is, indeed, highly correlated to the Education:
+
+```{r}
+cor(cleaned$Wage, cleaned$Education)
+```
+Meaning that more study years lead to higher salary levels (and vice versa).
+This can be easily visualized observing the following plot:
+
+```{r}
+plot(cleaned$Wage ~ cleaned$Education, main="Wage by Education", xlab="Years in 
+     education", ylab="Income per month", col="black", pch=20)
+```
+This relation persists also when taking the Gender into account. Indeed, we can
+compute the correlation coefficients between Wage and Education for men and 
+women separately:
+```{r}
+cor(men_new$Wage, men_new$Education)
+cor(women_new$Wage, women_new$Education)
+```
+Also in this case we can visualize the relation in two different plots:
+```{r}
+plot(men_new$Wage ~ men_new$Education, main="Wage by Education (Men)", 
+     xlab="Years in education", ylab="Income per month", col="blue", pch=20)
+
+plot(women_new$Wage ~ women_new$Education, main="Wage by Education (Women)", 
+     xlab="Years in education", ylab="Income per month", col="red", pch=20)
+```
+Observing the two graphs, is possible to detect that the increase in salary for 
+women corresponding to higher levels of education is lower than for men.
+This lead us to infer that the predicted Wage will increase for higher values of 
+Education, but not equally between the Genders (more for men and less for women).

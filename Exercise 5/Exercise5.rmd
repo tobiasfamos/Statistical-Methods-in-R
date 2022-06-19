@@ -1,0 +1,17 @@
+---
+title: "Exercise 5"
+author: "Tobias Famos"
+output: pdf_document
+---
+# Exercise 5
+
+
+From the output we can conclude that the model accurately describes the Wage using the variables Education and Gender.
+As the R^2 is 0.99 (almost 1) we can conclude that with our dataset we explain the bulk part of the variance.
+Additionally, we can conclude that for our dataset both gender and education have a very high significance due to the low P value.
+
+## Task 2
+Read Data, remove model and ERP (model is not usable as it is unique, thus can be seen as an ID)
+```{r}
+computers <- read.table("/home/tobias/unibe/statistical methods in R/Exercise 5/Computers.txt", header = T, as.is = FALSE)
+```

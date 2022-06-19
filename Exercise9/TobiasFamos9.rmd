@@ -1,0 +1,259 @@
+---
+title: "Statistical Learning Methods Exercise 9"
+output: pdf_document
+author: "Tobias Famos"
+---
+# Preliminaries Task 1 - 3
+Open and take a look at the `Low Weight` Dataset
+```{r}
+low_weight.raw <- read.table("/home/tobias/unibe/statistical methods in R/Exercise9/LowWeight.txt", header=T)
+summary(low_weight.raw)
+sum(is.na(low_weight.raw))
+```
+Remove index
+```{r}
+low_weight <- subset(low_weight.raw, select=-id)
+```
+# Task 1 Building a tree
+Import the library
+```{r}
+library(tree)
+```
+
+Split the dataset into train and test (split in half)
+
+```{r}
+set.seed(1)
+n <- dim(low_weight)[1]
+low_weight.train.indices <- sample(1:n, n/2)
+low_weight.test <- low_weight[-low_weight.train.indices ]
+```
+Build the regression tree
+```{r}
+low_weight.tree <- tree(birth_weight ~ ., low_weight, split="deviance", subset=low_weight.train.indices)
+summary(low_weight.tree)
+```
+
+Plot the initial Tree
+```{r}
+plot(low_weight.tree)
+text(low_weight.tree, pretty=0, cex=1.1)
+```
+
+# Task 2
+Calculate the train MSE
+```{r}
+train_labels <- low_weight[low_weight.train.indices,]$birth_weight
+low_weight.tree.predictions <- predict(low_weight.tree, low_weight[low_weight.train.indices, ], type="vector")
+mean((low_weight.tree.predictions - train_labels)^2)
+```
+ Calculate the Test MSE
+
+```{r}
+test_labels <- low_weight[-low_weight.train.indices,]$birth_weight
+test_data <- low_weight[-low_weight.train.indices,]
+low_weight.tree.predictions <- predict(low_weight.tree, test_data, type="vector")
+mean((low_weight.tree.predictions - test_labels)^2)
+```
+
+As expected, the MSE in the test **179828.6** dataset is higher than the MSE on the train dataset **142767.3**
+
+# Task 3 Pruning
+As the tree has a higher MSE on the test Dataset than on the train dataset it might still have some overfitting. Thus
+pruning can be a valid approach to reduce the test MSE
+Let's use a 10-fold Cross validation approach for the pruning.
+It is my understanding, that the cv.tree package tries different cost-complexity parameters and extrapolates the best fit
+```{r}
+low_weight.cv <- cv.tree(low_weight.tree, K=10)
+```
+Now lets plot the tree size and deviance to get a better picture
+```{r}
+plot(low_weight.cv$size, low_weight.cv$dev, main="CV Deviance and size", type="b")
+plot(low_weight.cv)
+
+```
+
+As we can clearly see, the smallest deviance is with the size 2
+
+```{r}
+low_weight.pruned <- prune.tree(low_weight.tree, best=2)
+plot(low_weight.pruned)
+text(low_weight.pruned, pretty=0)
+
+```
+```{r}
+pruned.predictions <- predict(low_weight.pruned , test_data, type="vector")
+mean((pruned.predictions - test_labels)^2)
+```
+Somehow, the pruning did not bring any benefit, as the MSE is higher now on based on the pruned decision tree
+on the test set as with the unpruned deicision tree on the test set.
+
+# Preliminaries Task 4 - 6
+Read the heart data
+```{r}
+heart.raw <- read.table("/home/tobias/unibe/statistical methods in R/Exercise9/Heart.txt", header = T, as.is=T)
+heart.raw$disease <- factor(heart.raw$disease, levels=c(1,2), labels=c('Absent', 'Present'))
+str(heart.raw)
+summary(heart.raw)
+sum(is.na(heart.raw))
+heart <- subset(heart.raw, select=-ID)
+```
+
+# Task 3 Build a decision tree for classification
+Splitting into test and train dataset
+```{r}
+set.seed(1)
+n <- dim(heart)[1]
+heart.train.indices <- sample(1:n, n/2)
+heart.test <- heart[-heart.train.indices, ]
+heart.train <- heart[heart.train.indices, ]
+heart.train.labels <- heart.train$disease
+heart.test.labels <- heart.test$disease
+```
+Build the decision tree on the train dataset
+```{r}
+heart.tree <- tree(disease ~ ., heart, split="gini", method="deviance", subset=heart.train.indices)
+summary(heart.tree)
+```
+```{r}
+plot(heart.tree)
+text(heart.tree, pretty=0)
+```
+# Task 4 Confustion matrix
+```{r}
+pred.train <- predict(heart.tree ,heart.train, type="class")
+pred.test <- predict(heart.tree ,heart.test, type="class")
+
+train.table <- table(pred.train, heart.train.labels, dnn = c('Predicted Disease','Actual Disease'))
+test.table <- table(pred.test, heart.test.labels, dnn = c('Predicted Disease','Actual Disease'))
+test.table
+train.table
+```
+
+Calculating the Accuracy, sensitivity and specivity
+First extract the base values for the train and test datasets for TP, TN, FP, FN
+```{r}
+train.tp <- train.table[2,2]
+test.tp <- test.table[2,2]
+
+train.tn <- train.table[1,1]
+test.tn <- test.table[1,1]
+
+train.fn <- train.table[1,2]
+test.fn <- test.table[1,2]
+
+train.fp <- train.table[2,1]
+test.fp <- test.table[2,1]
+```
+
+## Accuracy
+`Accuracy = (TN + TP)/N `
+```{r}
+train.accuracy <- (train.tn + train.tp) / (train.tn + train.tp + train.fn + train.fp)
+train.accuracy
+test.accuracy <- (test.tn + test.tp) / (test.tn + test.tp + test.fn + test.fp)
+test.accuracy
+```
+## Sensitivity
+`Sensitivity = TP/(TP + FN)`
+```{r}
+train.sensitivity <- train.tp / (train.tp + train.fn)
+train.sensitivity
+test.sensitivity <- test.tp / (test.tp + test.fn)
+test.sensitivity
+
+```
+
+## Specificity
+`Specificity = TN/(TN + FP)`
+```{r}
+train.specificity <- train.tn / (train.tn + train.fp)
+train.specificity
+test.specificity <- test.tn / (test.tn + test.fp)
+test.specificity
+```
+
+## Analysis
+The test Accuracy is quite high and also the train Accuracy of 70% is not too bad for new data.
+Quite remarkable is that the sensitivity on the test data is higher than on the train data. This implies that the model
+might be better on classifying the disease (if it exists) on new data than on already seen.
+But, the specificity is quite low on the test dataset. This means that in many cases, when the disease is not present,
+a patient is still marked as having the disease.
+
+# Task 6 Pruning
+A little pruning might be a good thing. If one only looks at the plot of the graph we see a lot of potential for
+simplification as many decisions on internal node of the last level lead to terminal nodes of the same class
+
+
+```{r}
+heart.cv <- cv.tree(heart.tree, K=10)
+```
+Now lets plot the tree size and deviance to get a better picture
+```{r}
+plot(heart.cv$size, heart.cv$dev, main="CV Deviance and size", type="b")
+plot(heart.cv)
+
+```
+The best size would be 4.
+```{r}
+heart.pruned <- prune.tree(heart.tree, best=4)
+plot(heart.pruned)
+text(heart.pruned, pretty=0)
+```
+```{r}
+prune.pred.train <- predict(heart.pruned ,heart.train, type="class")
+prune.pred.test <- predict(heart.pruned ,heart.test, type="class")
+
+prune.train.table <- table(prune.pred.train, heart.train.labels, dnn = c('Predicted Disease','Actual Disease'))
+prune.test.table <- table(prune.pred.test, heart.test.labels, dnn = c('Predicted Disease','Actual Disease'))
+prune.test.table
+prune.train.table
+```
+
+
+## Comparison
+Calculating the Accuracy, sensitivity and specivity
+First extract the base values for the train and test datasets for TP, TN, FP, FN
+```{r}
+train.tp.prune <- prune.train.table[2,2]
+test.tp.prune <- prune.test.table[2,2]
+
+train.tn.prune <- prune.train.table[1,1]
+test.tn.prune <- prune.test.table[1,1]
+
+train.fn.prune <- prune.train.table[1,2]
+test.fn.prune <- prune.test.table[1,2]
+
+train.fp.prune <- prune.train.table[2,1]
+test.fp.prune <- prune.test.table[2,1]
+```
+
+## Accuracy
+`Accuracy = (TN + TP)/N `
+```{r}
+train.accuracy.prune <- (train.tn.prune + train.tp.prune) / (train.tn.prune + train.tp.prune + train.fn.prune + train.fp.prune)
+train.accuracy.prune
+test.accuracy.prune <- (test.tn.prune + test.tp.prune) / (test.tn.prune + test.tp.prune + test.fn.prune + test.fp.prune)
+test.accuracy.prune
+```
+## Sensitivity
+`Sensitivity = TP/(TP + FN)`
+```{r}
+train.sensitivity.prune <- train.tp.prune / (train.tp.prune + train.fn.prune)
+train.sensitivity.prune
+test.sensitivity.prune <- test.tp.prune / (test.tp.prune + test.fn.prune)
+test.sensitivity.prune
+
+```
+
+## Specificity
+`Specificity = TN/(TN + FP)`
+```{r}
+train.specificity.prune <- train.tn.prune / (train.tn.prune + train.fp.prune)
+train.specificity.prune
+test.specificity.prune <- test.tn.prune / (test.tn.prune + test.fp.prune)
+test.specificity.prune
+```
+
+It is worth noting, that the values have all decreased for the train dataset and increased for the test dataset.
+Thus we have reached a higher level of generalization (or a lower level of overfitting)
